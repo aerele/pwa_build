@@ -38,10 +38,12 @@ def get_number_card_details(docname: str) -> dict:
         frappe.log_error(title=_("PWA App"), message=_("Document is missing"))
         return {"data": None}
 
-    company_currency = get_default_currency()
-    currency_doc = frappe.get_doc("Currency", company_currency)
-
     doc = frappe.get_doc("Number Card", docname)
+
+    currency = doc.currency if doc.currency else None
+    if currency and frappe.db.exists("Currency", currency):
+        currency_doc = frappe.get_doc("Currency", currency)
+    
     if not doc:
         frappe.log_error(title=_("PWA App"), message=_(f"Number Card '{docname}' not found"))
         return {"data": None}
@@ -49,7 +51,7 @@ def get_number_card_details(docname: str) -> dict:
     if doc.type != "Custom":
         value = get_result(doc, doc.filters_json)
         formatted_value = format_number(value)
-        if doc.function != "Count":
+        if doc.function != "Count" and currency:
             formatted_value = f'{currency_doc.symbol} {formatted_value}'
 
         return {
@@ -66,7 +68,7 @@ def get_number_card_details(docname: str) -> dict:
         value = custom_value.get("value")
         formatted_value = format_number(value)
 
-        if custom_value.get("fieldtype") == "Currency":
+        if custom_value.get("fieldtype") == "Currency" and currency:
             formatted_value = f'{currency_doc.symbol} {formatted_value}'
 
         return {
