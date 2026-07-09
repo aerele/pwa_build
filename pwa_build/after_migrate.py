@@ -8,6 +8,7 @@ from frappe.query_builder import DocType
 class AfterMigrate:
 	def __init__(self):
 		self.sync_pwa_forms()
+		apply_nav_order()
 
 	def sync_pwa_forms(self):
 		apps = frappe.get_installed_apps()
@@ -23,6 +24,26 @@ class AfterMigrate:
 				# print each progress bar on new line
 				print()
 							
+def apply_nav_order():
+	"""Stamp modified timestamps in reverse nav order so the bundled frontend's
+	default `modified desc` listing renders screens in the designed flow order."""
+	from frappe.utils import add_to_date, now_datetime
+
+	rows = []
+	for doctype in ("PWA Form", "PWA Dashboard"):
+		rows += [(doctype, row.name, row.nav_order) for row in frappe.get_all(doctype, fields=["name", "nav_order"])]
+
+	if not any(row[2] for row in rows):
+		return
+
+	rows.sort(key=lambda row: (row[2] is None, row[2] or 0))
+	base = now_datetime()
+	for position, (doctype, name, _nav_order) in enumerate(rows):
+		frappe.db.set_value(
+			doctype, name, "modified", add_to_date(base, seconds=-position), update_modified=False
+		)
+
+
 def import_forms(file_path):
 	try:
 		docs = import_file.read_doc_from_file(file_path)
