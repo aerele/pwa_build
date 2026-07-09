@@ -8,6 +8,7 @@
   "form_name",
   "column_break_udhj",
   "doctype_name",
+  "nav_order",
   "fields_section",
   "pwa_dashboard_fields",
   "more_info_section",
@@ -52,12 +53,19 @@
    "fieldtype": "JSON",
    "label": "PWA Dashboard Fields",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Position of this screen in the app navigation (lower comes first).",
+   "fieldname": "nav_order",
+   "fieldtype": "Int",
+   "label": "Nav Order"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-13 15:50:05.230620",
+ "modified": "2026-07-09 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Pwa Build",
  "name": "PWA Dashboard",
